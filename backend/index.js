@@ -3,8 +3,11 @@ const connectToMongo = require('./db')
 connectToMongo()
 
 const express = require('express')
-const app = express()
+var cors = require('cors')
+var app = express()
 const port = 5000 
+
+app.use(cors())
 
 app.use(express.json())
 
@@ -18,5 +21,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Evernote App listening on port ${port}`)
 }) 
