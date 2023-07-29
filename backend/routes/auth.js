@@ -19,16 +19,19 @@ router.post('/createuser', [
     body('password').isLength({ min: 5 }).withMessage('Password must be at least 5 characters long')
 
 ], async (req, res) => {
+    let success = true
    const errors = validationResult(req)
    if(!errors.isEmpty()){ 
-    return res.status(400).json({errors: errors.array() });
+    success= false
+    return res.status(400).json({success,errors: errors.array() });
    }
 
    //check whether email already exists 
    try {
     let user = await User.findOne({email : req.body.email});
     if (user){
-     return res.status(400).json({error : "Email address already exists"})
+        success = false
+     return res.status(400).json({success,error : "Email address already exists"})
     }
     //using brycpt js
     
@@ -51,7 +54,8 @@ router.post('/createuser', [
     const authtoken = jwt.sign(data, JWT_SECRET);  //for digital signing of req
 
     // res.json(user)
-    res.json({authtoken})     //it will return authtoken
+    success = true
+    res.json({success, authtoken})     //it will return authtoken
 
    } catch (error) {  //if some internal error has occured
         console.error(error.message)
@@ -68,6 +72,7 @@ router.post('/login', [
     body('password','password cannot be blank').exists()
 
 ], async (req, res) => {
+    let success = true
     const errors = validationResult(req)
     if(!errors.isEmpty()){ 
      return res.status(400).json({errors: errors.array() })
@@ -76,11 +81,14 @@ router.post('/login', [
     try {
         let user = await User.findOne({email});
         if(!user){
+            success = false;
+
             return res.status(400).json({error: "please enter valid credentials"})
         }
         const passwordCompare = await bcrypt.compare(password, user.password);
         if(!passwordCompare){
-            return res.status(400).json({error: "please enter valid credentials"})
+            success = false;
+            return res.status(400).json({success, error: "please enter valid credentials"})
         }
 
         const data = {
@@ -89,7 +97,7 @@ router.post('/login', [
             }
         }
         const authtoken = jwt.sign(data, JWT_SECRET); 
-        res.json(authtoken)
+        res.json({success,authtoken})
     } catch (error) {  //if some internal error has occured
         console.error(error.message)
         res.status(500).send("Internal server error")
