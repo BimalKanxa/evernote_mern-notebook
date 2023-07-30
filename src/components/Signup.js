@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import { useNavigate } from "react-router-dom";
 
 
-const Signup = () => {
+const Signup = (props) => {
     const [credentials, setCredentials] = useState({name: "",email:"", password:"",cpassword:""})
     let navigate = useNavigate()
     const handleSubmit = async(e) =>{
@@ -20,11 +20,15 @@ const Signup = () => {
           const json = await response.json()
           console.log(json)
 
-         
+         if(json.success){
             //save the auth token and redirect
             localStorage.setItem('token', json.authtoken);
             navigate("/")
-         
+            props.showAlert("Account created successfully", "success")
+         }
+         else{
+            props.showAlert("Invalid credentials", "danger")
+         }
          }
 
          const onChange = (e) =>{
@@ -33,7 +37,8 @@ const Signup = () => {
 
     
     return (
-        <div>
+        <div className='container mt-2'>
+            <h2>Create an account to use Evernote</h2>
             <form onSubmit={handleSubmit}>
             <div className="mb-3">
                     <label htmlFor="name" className="form-label">Name : </label>
